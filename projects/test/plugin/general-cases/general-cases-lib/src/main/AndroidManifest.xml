@@ -12,6 +12,8 @@
 
         <meta-data android:name="test_meta" android:value="test_value" />
 
+        <activity android:name=".usecases.activity.TestListActivity"/>
+
         <activity android:name=".usecases.activity.TestActivityReCreate" />
 
         <activity android:name=".usecases.activity.TestActivityOnCreate" />
@@ -37,11 +39,9 @@
 
         <activity android:name=".usecases.receiver.TestReceiverActivity" />
 
-        <activity android:name=".usecases.receiver.TestDynamicReceiverActivity" />
+        <activity android:name=".usecases.fragment.ProgrammaticallyAddFragmentActivity" />
 
-        <activity android:name=".usecases.fragment.TestDynamicFragmentActivity" />
-
-        <activity android:name=".usecases.fragment.TestXmlFragmentActivity" />
+        <activity android:name=".usecases.fragment.XmlAddFragmentActivity" />
 
         <activity android:name=".usecases.dialog.TestDialogActivity" />
 
@@ -53,7 +53,7 @@
 
         <receiver android:name=".usecases.receiver.MyReceiver">
             <intent-filter>
-                <action android:name="com.tencent.test.action"/>
+                <action android:name="com.tencent.test.normal.action"/>
             </intent-filter>
         </receiver>
 
@@ -72,6 +72,10 @@
         <activity android:name=".usecases.context.ServiceContextSubDirTestActivity" />
 
         <activity android:name=".usecases.context.ApplicationContextSubDirTestActivity" />
+        <activity android:name=".usecases.application.TestGetApplicationInfoActivity" />
+        <activity android:name=".usecases.activity.ApplicationContextActivity" />
+        <activity android:name=".usecases.fragment.TargetFragmentTestActivity" />
+        <activity android:name=".usecases.fragment.FragmentStartedActivity" />
 
         <provider
             android:authorities="com.tencent.shadow.provider.test"

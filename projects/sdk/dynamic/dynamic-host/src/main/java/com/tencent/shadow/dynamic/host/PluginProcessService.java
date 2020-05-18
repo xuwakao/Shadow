@@ -18,21 +18,14 @@
 
 package com.tencent.shadow.dynamic.host;
 
-import android.app.Activity;
 import android.app.Application;
-import android.app.Service;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.tencent.shadow.core.common.InstalledApk;
-import com.tencent.shadow.core.common.Logger;
-import com.tencent.shadow.core.common.LoggerFactory;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 
 import static com.tencent.shadow.dynamic.host.FailedException.ERROR_CODE_FILE_NOT_FOUND_EXCEPTION;
 import static com.tencent.shadow.dynamic.host.FailedException.ERROR_CODE_RELOAD_LOADER_EXCEPTION;
@@ -43,8 +36,7 @@ import static com.tencent.shadow.dynamic.host.FailedException.ERROR_CODE_UUID_MA
 import static com.tencent.shadow.dynamic.host.FailedException.ERROR_CODE_UUID_MANAGER_NULL_EXCEPTION;
 
 
-public class PluginProcessService extends Service {
-    private static final Logger mLogger = LoggerFactory.getLogger(PluginProcessService.class);
+public class PluginProcessService extends BasePluginProcessService {
 
     private final PpsBinder mPpsControllerBinder = new PpsBinder(this);
 
@@ -59,51 +51,11 @@ public class PluginProcessService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        if (mLogger.isInfoEnabled()) {
-            mLogger.info("onCreate:" + this);
-        }
-    }
-
-    @Override
     public IBinder onBind(Intent intent) {
         if (mLogger.isInfoEnabled()) {
             mLogger.info("onBind:" + this);
         }
         return mPpsControllerBinder;
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        if (mLogger.isInfoEnabled()) {
-            mLogger.info("onUnbind:" + this);
-        }
-        return super.onUnbind(intent);
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        super.onRebind(intent);
-        if (mLogger.isInfoEnabled()) {
-            mLogger.info("onRebind:" + this);
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mLogger.isInfoEnabled()) {
-            mLogger.info("onDestroy:" + this);
-        }
-    }
-
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        super.onTaskRemoved(rootIntent);
-        if (mLogger.isInfoEnabled()) {
-            mLogger.info("onTaskRemoved:" + this);
-        }
     }
 
     private UuidManager mUuidManager;
@@ -203,11 +155,14 @@ public class PluginProcessService extends Service {
                 mLogger.error("loadPluginLoader发生RuntimeException", e);
             }
             throw new FailedException(e);
+        } catch (FailedException e) {
+            throw e;
         } catch (Exception e) {
             if (mLogger.isErrorEnabled()) {
                 mLogger.error("loadPluginLoader发生Exception", e);
             }
-            throw new FailedException(ERROR_CODE_RUNTIME_EXCEPTION, "加载动态实现失败 cause：" + e.getCause().getMessage());
+            String msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            throw new FailedException(ERROR_CODE_RUNTIME_EXCEPTION, "加载动态实现失败 cause：" + msg);
         }
     }
 
@@ -242,53 +197,5 @@ public class PluginProcessService extends Service {
 
     IBinder getPluginLoader() {
         return mPluginLoader;
-    }
-
-    static class ActivityHolder implements Application.ActivityLifecycleCallbacks {
-
-        private List<Activity> mActivities = new LinkedList<>();
-
-        void finishAll() {
-            for (Activity activity : mActivities) {
-                activity.finish();
-            }
-        }
-
-        @Override
-        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            mActivities.add(activity);
-        }
-
-        @Override
-        public void onActivityDestroyed(Activity activity) {
-            mActivities.remove(activity);
-        }
-
-        @Override
-        public void onActivityStarted(Activity activity) {
-
-        }
-
-        @Override
-        public void onActivityResumed(Activity activity) {
-
-        }
-
-        @Override
-        public void onActivityPaused(Activity activity) {
-
-        }
-
-        @Override
-        public void onActivityStopped(Activity activity) {
-
-        }
-
-        @Override
-        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-        }
-
-
     }
 }

@@ -19,13 +19,14 @@
 package com.tencent.shadow.core.loader.blocs
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.res.Resources
 import com.tencent.shadow.core.loader.classloaders.PluginClassLoader
 import com.tencent.shadow.core.loader.exceptions.CreateApplicationException
+import com.tencent.shadow.core.loader.infos.PluginInfo
 import com.tencent.shadow.core.loader.managers.ComponentManager
-import com.tencent.shadow.core.loader.managers.PluginPackageManager
+import com.tencent.shadow.core.runtime.ShadowAppComponentFactory
 import com.tencent.shadow.core.runtime.ShadowApplication
-import com.tencent.shadow.core.runtime.remoteview.ShadowRemoteViewCreatorProvider
 
 /**
  * 初始化插件Application类
@@ -36,32 +37,29 @@ object CreateApplicationBloc {
     @Throws(CreateApplicationException::class)
     fun createShadowApplication(
             pluginClassLoader: PluginClassLoader,
-            appClassName: String?,
-            pluginPackageManager: PluginPackageManager,
+            pluginInfo: PluginInfo,
             resources: Resources,
             hostAppContext: Context,
             componentManager: ComponentManager,
-            remoteViewCreatorProvider: ShadowRemoteViewCreatorProvider?
+            applicationInfo: ApplicationInfo,
+            appComponentFactory: ShadowAppComponentFactory
     ): ShadowApplication {
         try {
-            val shadowApplication : ShadowApplication;
-            shadowApplication = if (appClassName != null) {
-                val appClass = pluginClassLoader.loadClass(appClassName)
-                ShadowApplication::class.java.cast(appClass.newInstance())
-            } else {
-                object : ShadowApplication(){}
-            }
-            val partKey = pluginPackageManager.pluginInfo.partKey
+            val appClassName = pluginInfo.applicationClassName
+                    ?: ShadowApplication::class.java.name
+            val shadowApplication = appComponentFactory.instantiateApplication(pluginClassLoader, appClassName)
+            val partKey = pluginInfo.partKey
             shadowApplication.setPluginResources(resources)
             shadowApplication.setPluginClassLoader(pluginClassLoader)
             shadowApplication.setPluginComponentLauncher(componentManager)
-            shadowApplication.setHostApplicationContextAsBase(hostAppContext)
             shadowApplication.setBroadcasts(componentManager.getBroadcastsByPartKey(partKey))
-            shadowApplication.setLibrarySearchPath(pluginClassLoader.getLibrarySearchPath())
-            shadowApplication.setDexPath(pluginClassLoader.getDexPath())
-            shadowApplication.setBusinessName(pluginPackageManager.pluginInfo.businessName)
+            shadowApplication.setAppComponentFactory(appComponentFactory)
+            shadowApplication.applicationInfo = applicationInfo
+            shadowApplication.setBusinessName(pluginInfo.businessName)
             shadowApplication.setPluginPartKey(partKey)
-            shadowApplication.remoteViewCreatorProvider = remoteViewCreatorProvider
+
+            //和ShadowActivityDelegate.initPluginActivity一样，attachBaseContext放到最后
+            shadowApplication.setHostApplicationContextAsBase(hostAppContext)
             return shadowApplication
         } catch (e: Exception) {
             throw CreateApplicationException(e)

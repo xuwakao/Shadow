@@ -20,6 +20,7 @@ package com.tencent.shadow.core.loader.blocs
 
 import android.content.Context
 import android.content.pm.PackageInfo
+import android.os.Build
 import com.tencent.shadow.core.load_parameters.LoadParameters
 import com.tencent.shadow.core.loader.exceptions.ParsePluginApkException
 import com.tencent.shadow.core.loader.infos.PluginActivityInfo
@@ -73,11 +74,10 @@ object ParsePluginApkBloc {
                 , partKey
                 , packageArchiveInfo.applicationInfo.packageName
                 , packageArchiveInfo.applicationInfo.className
-                , packageArchiveInfo.applicationInfo.metaData
-                , packageArchiveInfo.versionCode
-                , packageArchiveInfo.versionName
-                , packageArchiveInfo.signatures
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            pluginInfo.appComponentFactory = packageArchiveInfo.applicationInfo.appComponentFactory
+        }
         packageArchiveInfo.activities?.forEach {
             pluginInfo.putActivityInfo(PluginActivityInfo(it.name, it.themeResource, it))
         }

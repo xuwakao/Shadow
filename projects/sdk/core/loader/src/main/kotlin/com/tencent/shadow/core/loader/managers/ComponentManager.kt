@@ -32,7 +32,7 @@ import com.tencent.shadow.core.runtime.ShadowContext.PluginComponentLauncher
 import com.tencent.shadow.core.runtime.container.DelegateProvider.LOADER_VERSION_KEY
 import com.tencent.shadow.core.runtime.container.DelegateProvider.PROCESS_ID_KEY
 import com.tencent.shadow.core.runtime.container.DelegateProviderHolder
-import com.tencent.shadow.core.runtime.container.HostActivityDelegator
+import com.tencent.shadow.core.runtime.container.GeneratedHostActivityDelegator
 
 /**
  * 插件组件管理
@@ -62,9 +62,9 @@ abstract class ComponentManager : PluginComponentLauncher {
 
     abstract fun getBroadcastInfoList(partKey: String): List<BroadcastInfo>?
 
-    override fun startActivity(shadowContext: ShadowContext, pluginIntent: Intent): Boolean {
+    override fun startActivity(shadowContext: ShadowContext, pluginIntent: Intent, option: Bundle?): Boolean {
         return if (pluginIntent.isPluginComponent()) {
-            shadowContext.superStartActivity(pluginIntent.toActivityContainerIntent())
+            shadowContext.superStartActivity(pluginIntent.toActivityContainerIntent(), option)
             true
         } else {
             false
@@ -72,7 +72,7 @@ abstract class ComponentManager : PluginComponentLauncher {
     }
 
 
-    override fun startActivityForResult(delegator: HostActivityDelegator, pluginIntent: Intent, requestCode: Int, option: Bundle?, callingActivity: ComponentName): Boolean {
+    override fun startActivityForResult(delegator: GeneratedHostActivityDelegator, pluginIntent: Intent, requestCode: Int, option: Bundle?, callingActivity: ComponentName): Boolean {
         return if (pluginIntent.isPluginComponent()) {
             val containerIntent = pluginIntent.toActivityContainerIntent()
             containerIntent.putExtra(CM_CALLING_ACTIVITY_KEY,callingActivity)
